@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏭 Industrial SCADA/DCS System</title>
+    <title>🏭 Industrial SCADA/DCS System with Neural Network</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
@@ -169,9 +169,10 @@
 
         .sidebar {
             background: var(--panel-bg);
-            padding: 15px;
+            padding: 10px;
             overflow-y: auto;
             border-right: 1px solid var(--border-color);
+            max-height: calc(100vh - 120px);
         }
 
         .sidebar h3 {
@@ -272,7 +273,7 @@
             opacity: 0;
         }
 
-        /* PID Parameters Modal */
+        /* Modal Overlays */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -428,6 +429,178 @@
             margin-top: 20px;
             padding-top: 15px;
             border-top: 1px solid var(--border-color);
+        }
+
+        /* Neural Network Visualization */
+        .neural-network-viz {
+            width: 100%;
+            height: 400px;
+            background: var(--scada-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neural-layer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .neural-neuron {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--secondary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            transition: all 0.5s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .neural-neuron:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px var(--secondary-blue);
+        }
+
+        .neural-neuron.active {
+            background: var(--success-green);
+            border-color: var(--success-green);
+            box-shadow: 0 0 10px var(--success-green);
+            animation: neuron-pulse 2s infinite;
+        }
+
+        .neural-neuron.inactive {
+            background: var(--gray-dark);
+            border-color: var(--gray-dark);
+            opacity: 0.5;
+        }
+
+        .neural-neuron.input {
+            background: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+        }
+
+        .neural-neuron.output {
+            background: var(--warning-yellow);
+            border-color: var(--warning-yellow);
+            color: black;
+        }
+
+        @keyframes neuron-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .neural-connection {
+            position: absolute;
+            height: 2px;
+            background: var(--border-color);
+            transform-origin: left center;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .neural-connection.active {
+            background: var(--success-green);
+            box-shadow: 0 0 4px var(--success-green);
+            height: 3px;
+        }
+
+        .neural-connection.strong {
+            background: var(--warning-yellow);
+            height: 4px;
+            box-shadow: 0 0 6px var(--warning-yellow);
+        }
+
+        .neural-label {
+            position: absolute;
+            font-size: 10px;
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .neural-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .neural-stat {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--secondary-blue);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .neural-stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .neural-stat-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .weight-matrix {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .weight-matrix h5 {
+            color: var(--secondary-blue);
+            margin: 0 0 10px 0;
+            font-size: 12px;
+        }
+
+        .weight-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .weight-cell {
+            background: var(--scada-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 9px;
+            font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .weight-cell.positive {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: var(--success-green);
+        }
+
+        .weight-cell.negative {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger-red);
         }
 
         @keyframes fadeIn {
@@ -610,76 +783,14 @@
         }
 
         /* Main process flow pipes */
-        .pipe1 {
-            left: 140px;
-            top: 335px;
-            width: 70px;
-        }
-
-        .pipe2 {
-            left: 205px;
-            top: 270px;
-            height: 70px;
-        }
-
-        .pipe3 {
-            left: 320px;
-            top: 185px;
-            width: 90px;
-        }
-
-        .pipe4 {
-            left: 500px;
-            top: 135px;
-            width: 60px;
-        }
-
-        .pipe5 {
-            left: 555px;
-            top: 135px;
-            height: 70px;
-        }
-
-        .pipe6 {
-            left: 520px;
-            top: 300px;
-            width: 50px;
-        }
-
-        .pipe7 {
-            left: 105px;
-            top: 370px;
-            width: 420px;
-        }
-
-        .pipe8 {
-            left: 125px;
-            top: 360px;
-            height: 20px;
-        }
-
-        /* Flow direction arrows */
-        .flow-arrow {
-            position: absolute;
-            color: #00ff88;
-            font-size: 16px;
-            font-weight: bold;
-            text-shadow: 0 0 4px rgba(0, 255, 136, 0.6);
-            animation: flow-pulse 2s infinite;
-        }
-
-        @keyframes flow-pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        .arrow1 { left: 170px; top: 325px; }
-        .arrow2 { left: 195px; top: 290px; transform: rotate(90deg); }
-        .arrow3 { left: 350px; top: 175px; }
-        .arrow4 { left: 520px; top: 125px; }
-        .arrow5 { left: 545px; top: 160px; transform: rotate(90deg); }
-        .arrow6 { left: 540px; top: 290px; transform: rotate(180deg); }
-        .arrow7 { left: 300px; top: 360px; transform: rotate(180deg); }
+        .pipe1 { left: 140px; top: 335px; width: 70px; }
+        .pipe2 { left: 205px; top: 270px; height: 70px; }
+        .pipe3 { left: 320px; top: 185px; width: 90px; }
+        .pipe4 { left: 500px; top: 135px; width: 60px; }
+        .pipe5 { left: 555px; top: 135px; height: 70px; }
+        .pipe6 { left: 520px; top: 300px; width: 50px; }
+        .pipe7 { left: 105px; top: 370px; width: 420px; }
+        .pipe8 { left: 125px; top: 360px; height: 20px; }
 
         .sensor {
             position: absolute;
@@ -846,7 +957,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* JAVÍTÁS: AI Control Panel optimalizálás */
         .ai-control-panel {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
             border: 1px solid var(--secondary-blue);
@@ -882,33 +992,23 @@
             100% { transform: scale(1); }
         }
 
-        /* JAVÍTÁS: Sidebar scroll optimalizálás */
-        .sidebar {
-            background: var(--panel-bg);
-            padding: 10px;
-            overflow-y: auto;
-            border-right: 1px solid var(--border-color);
-            /* Biztosítjuk, hogy a teljes tartalom látható legyen */
-            max-height: calc(100vh - 120px);
-        }
-
-        /* JAVÍTÁS: AI control panel gomb optimalizálás */
         .control-row .control-button {
             font-size: 9px;
             padding: 4px 8px;
             white-space: nowrap;
         }
 
+        .process-variable.pv-temp1 { left: 90px; top: 180px; }
+        .process-variable.pv-temp2 { left: 450px; top: 50px; }
+        .process-variable.pv-flow1 { left: 250px; top: 380px; }
+        .process-variable.pv-pressure1 { left: 150px; top: 250px; }
+
         @media (max-width: 1400px) {
-            .main-container {
-                grid-template-columns: 280px 1fr 320px;
-            }
+            .main-container { grid-template-columns: 280px 1fr 320px; }
         }
 
         @media (max-width: 1200px) {
-            .main-container {
-                grid-template-columns: 250px 1fr 300px;
-            }
+            .main-container { grid-template-columns: 250px 1fr 300px; }
         }
 
         @media (max-width: 1024px) {
@@ -917,71 +1017,17 @@
                 grid-template-rows: auto auto auto;
                 height: auto;
             }
-            
-            .sidebar {
-                height: auto;
-                order: 1;
-            }
-            
-            .process-overview {
-                grid-column: 1;
-                grid-row: 1;
-                height: 500px;
-                order: 2;
-            }
-            
-            .right-panel {
-                height: auto;
-                order: 3;
-            }
-            
-            .alarms-panel, .trends-panel {
-                height: 300px;
-            }
+            .sidebar { height: auto; order: 1; }
+            .process-overview { grid-column: 1; grid-row: 1; height: 500px; order: 2; }
+            .right-panel { height: auto; order: 3; }
+            .alarms-panel, .trends-panel { height: 300px; }
         }
 
-        /* Mobile sidebar visibility fix */
         @media (max-width: 768px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto;
-            }
-            
-            .sidebar {
-                display: block !important;
-                width: 100% !important;
-                height: auto !important;
-                padding: 10px;
-            }
-            
-            .control-panel {
-                margin-bottom: 10px;
-            }
-            
-            .tag-group {
-                margin-bottom: 10px;
-            }
-        }
-
-        /* Process variables pozicionálása */
-        .process-variable.pv-temp1 {
-            left: 90px;
-            top: 180px;
-        }
-
-        .process-variable.pv-temp2 {
-            left: 450px;
-            top: 50px;
-        }
-
-        .process-variable.pv-flow1 {
-            left: 250px;
-            top: 380px;
-        }
-
-        .process-variable.pv-pressure1 {
-            left: 150px;
-            top: 250px;
+            .main-container { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+            .sidebar { display: block !important; width: 100% !important; height: auto !important; padding: 10px; }
+            .control-panel { margin-bottom: 10px; }
+            .tag-group { margin-bottom: 10px; }
         }
     </style>
 </head>
@@ -991,7 +1037,7 @@
             <div class="company-logo">🏭</div>
             <div class="system-info">
                 <h1>Industrial SCADA/DCS System</h1>
-                <p>Heat Exchange Process Control Unit #1 - AI-Enhanced PID Controller v2.1</p>
+                <p>Heat Exchange Process Control Unit #1 - AI-Enhanced PID Controller v2.1 with Neural Network</p>
             </div>
         </div>
         <div class="header-controls">
@@ -1010,7 +1056,6 @@
                 <button class="modal-close" onclick="closePIDModal()">✕</button>
             </div>
             <div class="modal-body">
-                <!-- Global PID Parameters -->
                 <div class="pid-section">
                     <h4>🎛️ Globális PID Paraméterek</h4>
                     <div class="pid-params-grid">
@@ -1037,7 +1082,6 @@
                     </div>
                 </div>
 
-                <!-- Temperature Control -->
                 <div class="pid-section">
                     <h4>🌡️ Hőmérséklet Szabályozás</h4>
                     <div class="pid-status">
@@ -1056,49 +1100,127 @@
                     </div>
                 </div>
 
-                <!-- Pressure Control -->
-                <div class="pid-section">
-                    <h4>⚡ Nyomás Szabályozás</h4>
-                    <div class="pid-status">
-                        <div class="pid-status-item">
-                            <div class="pid-status-label">Aktuális Hiba</div>
-                            <div class="pid-status-value" id="modal-pressure-error">0.0 bar</div>
-                        </div>
-                        <div class="pid-status-item">
-                            <div class="pid-status-label">Integrál</div>
-                            <div class="pid-status-value" id="modal-pressure-integral">0.0</div>
-                        </div>
-                        <div class="pid-status-item">
-                            <div class="pid-status-label">Derivált</div>
-                            <div class="pid-status-value" id="modal-pressure-derivative">0.0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Flow Control -->
-                <div class="pid-section">
-                    <h4>💧 Áramlás Szabályozás</h4>
-                    <div class="pid-status">
-                        <div class="pid-status-item">
-                            <div class="pid-status-label">Aktuális Hiba</div>
-                            <div class="pid-status-value" id="modal-flow-error">0.0 L/min</div>
-                        </div>
-                        <div class="pid-status-item">
-                            <div class="pid-status-label">Integrál</div>
-                            <div class="pid-status-value" id="modal-flow-integral">0.0</div>
-                        </div>
-                        <div class="pid-status-item">
-                            <div class="pid-status-label">Derivált</div>
-                            <div class="pid-status-value" id="modal-flow-derivative">0.0</div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="modal-actions">
                     <button class="control-button" onclick="goToControlView()">🎯 Vezérléshez</button>
                     <button class="control-button" onclick="tunePID()">🎯 Auto Tune</button>
                     <button class="control-button" onclick="resetAI()">🔄 Reset PID</button>
                     <button class="control-button" onclick="closePIDModal()">✅ Bezárás</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Neural Network Modal -->
+    <div class="modal-overlay" id="neural-modal-overlay" onclick="closeNeuralModal()">
+        <div class="pid-modal" onclick="event.stopPropagation()" style="width: 900px; max-width: 95vw;">
+            <div class="modal-header">
+                <h3>🧠 Neurális Háló Vizualizáció</h3>
+                <button class="modal-close" onclick="closeNeuralModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="pid-section">
+                    <h4>🏗️ Háló Architektúra (3-6-4-3)</h4>
+                    <div class="neural-network-viz" id="neural-network">
+                        <!-- Input Layer -->
+                        <div class="neural-layer" style="left: 50px;">
+                            <div class="neural-label" style="top: 10px;">Bemenet</div>
+                            <div class="neural-neuron input" data-neuron="temp" title="Hőmérséklet bemenet">T</div>
+                            <div class="neural-neuron input" data-neuron="pressure" title="Nyomás bemenet">P</div>
+                            <div class="neural-neuron input" data-neuron="flow" title="Áramlás bemenet">F</div>
+                        </div>
+                        
+                        <!-- Hidden Layer 1 -->
+                        <div class="neural-layer" style="left: 200px;">
+                            <div class="neural-label" style="top: 10px;">Rejtett 1</div>
+                            <div class="neural-neuron" data-neuron="h1_1" title="Rejtett neuron 1-1">H1</div>
+                            <div class="neural-neuron" data-neuron="h1_2" title="Rejtett neuron 1-2">H2</div>
+                            <div class="neural-neuron" data-neuron="h1_3" title="Rejtett neuron 1-3">H3</div>
+                            <div class="neural-neuron" data-neuron="h1_4" title="Rejtett neuron 1-4">H4</div>
+                            <div class="neural-neuron" data-neuron="h1_5" title="Rejtett neuron 1-5">H5</div>
+                            <div class="neural-neuron" data-neuron="h1_6" title="Rejtett neuron 1-6">H6</div>
+                        </div>
+                        
+                        <!-- Hidden Layer 2 -->
+                        <div class="neural-layer" style="left: 350px;">
+                            <div class="neural-label" style="top: 10px;">Rejtett 2</div>
+                            <div class="neural-neuron" data-neuron="h2_1" title="Rejtett neuron 2-1">H1</div>
+                            <div class="neural-neuron" data-neuron="h2_2" title="Rejtett neuron 2-2">H2</div>
+                            <div class="neural-neuron" data-neuron="h2_3" title="Rejtett neuron 2-3">H3</div>
+                            <div class="neural-neuron" data-neuron="h2_4" title="Rejtett neuron 2-4">H4</div>
+                        </div>
+                        
+                        <!-- Output Layer -->
+                        <div class="neural-layer" style="left: 500px;">
+                            <div class="neural-label" style="top: 10px;">Kimenet</div>
+                            <div class="neural-neuron output" data-neuron="kp_out" title="Kp kimenet">Kp</div>
+                            <div class="neural-neuron output" data-neuron="ki_out" title="Ki kimenet">Ki</div>
+                            <div class="neural-neuron output" data-neuron="kd_out" title="Kd kimenet">Kd</div>
+                        </div>
+                    </div>
+                    
+                    <div class="neural-stats">
+                        <div class="neural-stat">
+                            <div class="neural-stat-label">Aktív Kapcsolatok</div>
+                            <div class="neural-stat-value" id="active-connections">24/42</div>
+                        </div>
+                        <div class="neural-stat">
+                            <div class="neural-stat-label">Tanulási Ráta</div>
+                            <div class="neural-stat-value" id="learning-rate">0.001</div>
+                        </div>
+                        <div class="neural-stat">
+                            <div class="neural-stat-label">Hibafunkció</div>
+                            <div class="neural-stat-value" id="error-function">0.0023</div>
+                        </div>
+                        <div class="neural-stat">
+                            <div class="neural-stat-label">Epoch Szám</div>
+                            <div class="neural-stat-value" id="epoch-count">1247</div>
+                        </div>
+                        <div class="neural-stat">
+                            <div class="neural-stat-label">Konvergencia</div>
+                            <div class="neural-stat-value" id="convergence">94.2%</div>
+                        </div>
+                        <div class="neural-stat">
+                            <div class="neural-stat-label">Predikciós Pontosság</div>
+                            <div class="neural-stat-value" id="prediction-accuracy">97.8%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pid-section">
+                    <h4>⚖️ Súlymátrix Minta (Bemenet → Rejtett1)</h4>
+                    <div class="weight-matrix" id="weight-matrix">
+                        <div class="weight-row">
+                            <div class="weight-cell">T→H1</div>
+                            <div class="weight-cell positive" id="w_t_h1">0.342</div>
+                            <div class="weight-cell">T→H2</div>
+                            <div class="weight-cell negative" id="w_t_h2">-0.158</div>
+                            <div class="weight-cell">T→H3</div>
+                            <div class="weight-cell positive" id="w_t_h3">0.721</div>
+                        </div>
+                        <div class="weight-row">
+                            <div class="weight-cell">P→H1</div>
+                            <div class="weight-cell negative" id="w_p_h1">-0.234</div>
+                            <div class="weight-cell">P→H2</div>
+                            <div class="weight-cell positive" id="w_p_h2">0.567</div>
+                            <div class="weight-cell">P→H3</div>
+                            <div class="weight-cell positive" id="w_p_h3">0.091</div>
+                        </div>
+                        <div class="weight-row">
+                            <div class="weight-cell">F→H1</div>
+                            <div class="weight-cell positive" id="w_f_h1">0.445</div>
+                            <div class="weight-cell">F→H2</div>
+                            <div class="weight-cell negative" id="w_f_h2">-0.312</div>
+                            <div class="weight-cell">F→H3</div>
+                            <div class="weight-cell positive" id="w_f_h3">0.189</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="control-button" onclick="simulateTraining()">🎯 Tanítás Szimulálás</button>
+                    <button class="control-button" onclick="resetNeuralNetwork()">🔄 Háló Reset</button>
+                    <button class="control-button" onclick="exportNeuralData()">💾 Adatok Export</button>
+                    <button class="control-button" onclick="closeNeuralModal()">✅ Bezárás</button>
                 </div>
             </div>
         </div>
@@ -1112,7 +1234,7 @@
             <button class="toolbar-button" onclick="switchView('control')">⚙️ Vezérlés</button>
         </div>
         <div class="toolbar-group">
-            <button class="toolbar-button" onclick="exportReport(); console.log('Export button clicked');">📋 Jelentés</button>
+            <button class="toolbar-button" onclick="exportReport()">📋 Jelentés</button>
             <button class="toolbar-button" onclick="toggleMaintenance()">🔧 Karbantartás</button>
         </div>
         <div class="toolbar-group">
@@ -1208,7 +1330,6 @@
                         <span style="font-size: 10px; color: var(--text-secondary);">L/min</span>
                     </div>
                     
-                    <!-- Setpoint Status Display -->
                     <div style="margin-top: 15px; padding: 8px; background: rgba(59, 130, 246, 0.1); border-radius: 4px; border: 1px solid var(--secondary-blue);">
                         <div style="font-size: 10px; color: var(--secondary-blue); margin-bottom: 5px;">📊 Setpoint Állapot:</div>
                         <div style="font-size: 9px; color: var(--text-secondary);">
@@ -1218,7 +1339,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Setpoint Buttons -->
                     <div style="margin-top: 10px;">
                         <div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 5px;">Gyors Beállítások:</div>
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
@@ -1262,8 +1382,11 @@
                         <button class="control-button" onclick="tunePID()">🎯 TUNE</button>
                     </div>
                     <div class="control-row">
-                        <button class="control-button" onclick="openPIDModal()" style="width: 100%; background: var(--secondary-blue); margin-top: 8px; font-size: 9px; line-height: 1.2; padding: 6px 8px;">
-                            ⚙️ PID Paraméterek<br>Részletesen
+                        <button class="control-button" onclick="openPIDModal()" style="width: 48%; background: var(--secondary-blue); margin-top: 8px; font-size: 9px; line-height: 1.2; padding: 6px 8px;">
+                            ⚙️ PID<br>Paraméterek
+                        </button>
+                        <button class="control-button" onclick="openNeuralModal()" style="width: 48%; background: var(--success-green); margin-top: 8px; font-size: 9px; line-height: 1.2; padding: 6px 8px;">
+                            🧠 Neurális<br>Háló
                         </button>
                     </div>
                     <div class="neural-log" id="neural-log" style="margin-top: 8px; height: 80px;">
@@ -1279,9 +1402,13 @@
             <div class="piping-diagram">
                 <!-- Pipes -->
                 <div class="pipe pipe-horizontal pipe1"></div>
-                <div class="pipe pipe-horizontal pipe2"></div>
+                <div class="pipe pipe-vertical pipe2"></div>
                 <div class="pipe pipe-horizontal pipe3"></div>
-                <div class="pipe pipe-vertical pipe4"></div>
+                <div class="pipe pipe-horizontal pipe4"></div>
+                <div class="pipe pipe-vertical pipe5"></div>
+                <div class="pipe pipe-horizontal pipe6"></div>
+                <div class="pipe pipe-horizontal pipe7"></div>
+                <div class="pipe pipe-vertical pipe8"></div>
 
                 <!-- Equipment -->
                 <div class="equipment reactor" onclick="showEquipmentInfo('reactor')" title="R-001 Reaktor">
@@ -1349,10 +1476,6 @@
                 </div>
                 <div class="panel-content" id="alarms-panel-content">
                     <div id="alarms-list">
-                        <div class="alarm-entry info">
-                            <span class="alarm-time">12:34</span>
-                            <span class="alarm-message">SCADA/DCS rendszer elindítva</span>
-                        </div>
                         <div class="alarm-entry info">
                             <span class="alarm-time">12:35</span>
                             <span class="alarm-message">AI-PID tanulás aktiválva</span>
@@ -1450,10 +1573,393 @@
             flowIntegral: 0
         };
 
+        // Neural Network State
+        let neuralNetwork = {
+            weights: {
+                input_hidden1: [],
+                hidden1_hidden2: [],
+                hidden2_output: []
+            },
+            activations: {
+                input: [0, 0, 0],
+                hidden1: [0, 0, 0, 0, 0, 0],
+                hidden2: [0, 0, 0, 0],
+                output: [0, 0, 0]
+            },
+            learningRate: 0.001,
+            epochs: 0,
+            error: 0.0023,
+            convergence: 94.2
+        };
+
         // Chart objects
         let tempTrendChart = null;
         let pressureTrendChart = null;
         let pidTrendChart = null;
+
+        // Neural Network Functions
+        function openNeuralModal() {
+            const modal = document.getElementById('neural-modal-overlay');
+            if (modal) {
+                modal.classList.add('show');
+                initializeNeuralNetwork();
+                startNeuralAnimation();
+                addNeuralLog('[UI] Neurális háló ablak megnyitva', '#00ffff');
+            }
+        }
+
+        function closeNeuralModal() {
+            const modal = document.getElementById('neural-modal-overlay');
+            if (modal) {
+                modal.classList.remove('show');
+                stopNeuralAnimation();
+                addNeuralLog('[UI] Neurális háló ablak bezárva', '#00ffff');
+            }
+        }
+
+        function initializeNeuralNetwork() {
+            // Initialize random weights
+            neuralNetwork.weights.input_hidden1 = generateWeightMatrix(3, 6);
+            neuralNetwork.weights.hidden1_hidden2 = generateWeightMatrix(6, 4);
+            neuralNetwork.weights.hidden2_output = generateWeightMatrix(4, 3);
+            
+            // Update weight display
+            updateWeightDisplay();
+            
+            // Create neural connections visually
+            setTimeout(() => createNeuralConnections(), 100);
+            
+            updateNeuralStats();
+        }
+
+        function generateWeightMatrix(inputs, outputs) {
+            const matrix = [];
+            for (let i = 0; i < inputs; i++) {
+                matrix[i] = [];
+                for (let j = 0; j < outputs; j++) {
+                    matrix[i][j] = (Math.random() - 0.5) * 2; // -1 to 1
+                }
+            }
+            return matrix;
+        }
+
+        function updateWeightDisplay() {
+            // Update sample weights in the UI
+            if (neuralNetwork.weights.input_hidden1.length > 0) {
+                document.getElementById('w_t_h1').textContent = neuralNetwork.weights.input_hidden1[0][0].toFixed(3);
+                document.getElementById('w_t_h2').textContent = neuralNetwork.weights.input_hidden1[0][1].toFixed(3);
+                document.getElementById('w_t_h3').textContent = neuralNetwork.weights.input_hidden1[0][2].toFixed(3);
+                document.getElementById('w_p_h1').textContent = neuralNetwork.weights.input_hidden1[1][0].toFixed(3);
+                document.getElementById('w_p_h2').textContent = neuralNetwork.weights.input_hidden1[1][1].toFixed(3);
+                document.getElementById('w_p_h3').textContent = neuralNetwork.weights.input_hidden1[1][2].toFixed(3);
+                document.getElementById('w_f_h1').textContent = neuralNetwork.weights.input_hidden1[2][0].toFixed(3);
+                document.getElementById('w_f_h2').textContent = neuralNetwork.weights.input_hidden1[2][1].toFixed(3);
+                document.getElementById('w_f_h3').textContent = neuralNetwork.weights.input_hidden1[2][2].toFixed(3);
+            }
+            
+            // Update weight cell colors based on value
+            updateWeightColors();
+        }
+
+        function updateWeightColors() {
+            const weightCells = document.querySelectorAll('.weight-cell');
+            weightCells.forEach(cell => {
+                const value = parseFloat(cell.textContent);
+                if (!isNaN(value)) {
+                    if (value > 0) {
+                        cell.classList.remove('negative');
+                        cell.classList.add('positive');
+                    } else {
+                        cell.classList.remove('positive');
+                        cell.classList.add('negative');
+                    }
+                }
+            });
+        }
+
+        function createNeuralConnections() {
+            // Clear existing connections
+            const existingConnections = document.querySelectorAll('.neural-connection');
+            existingConnections.forEach(conn => conn.remove());
+            
+            const networkContainer = document.getElementById('neural-network');
+            if (!networkContainer) return;
+            
+            // Input to Hidden1 connections
+            const inputNeurons = document.querySelectorAll('[data-neuron="temp"], [data-neuron="pressure"], [data-neuron="flow"]');
+            const hidden1Neurons = document.querySelectorAll('[data-neuron^="h1_"]');
+            
+            inputNeurons.forEach((inputNeuron, i) => {
+                hidden1Neurons.forEach((hiddenNeuron, j) => {
+                    createConnection(inputNeuron, hiddenNeuron, `conn_i${i}_h1${j}`, networkContainer);
+                });
+            });
+            
+            // Hidden1 to Hidden2 connections
+            const hidden2Neurons = document.querySelectorAll('[data-neuron^="h2_"]');
+            hidden1Neurons.forEach((h1Neuron, i) => {
+                hidden2Neurons.forEach((h2Neuron, j) => {
+                    createConnection(h1Neuron, h2Neuron, `conn_h1${i}_h2${j}`, networkContainer);
+                });
+            });
+            
+            // Hidden2 to Output connections
+            const outputNeurons = document.querySelectorAll('[data-neuron="kp_out"], [data-neuron="ki_out"], [data-neuron="kd_out"]');
+            hidden2Neurons.forEach((h2Neuron, i) => {
+                outputNeurons.forEach((outputNeuron, j) => {
+                    createConnection(h2Neuron, outputNeuron, `conn_h2${i}_o${j}`, networkContainer);
+                });
+            });
+        }
+
+        function createConnection(fromNeuron, toNeuron, connectionId, container) {
+            const fromRect = fromNeuron.getBoundingClientRect();
+            const toRect = toNeuron.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const fromX = fromRect.left - containerRect.left + fromRect.width / 2;
+            const fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+            const toX = toRect.left - containerRect.left + toRect.width / 2;
+            const toY = toRect.top - containerRect.top + toRect.height / 2;
+            
+            const length = Math.sqrt((toX - fromX) ** 2 + (toY - fromY) ** 2);
+            const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+            
+            const connection = document.createElement('div');
+            connection.className = 'neural-connection';
+            connection.id = connectionId;
+            connection.style.left = fromX + 'px';
+            connection.style.top = fromY + 'px';
+            connection.style.width = length + 'px';
+            connection.style.transform = `rotate(${angle}deg)`;
+            
+            // Random activity state
+            if (Math.random() > 0.3) {
+                connection.classList.add('active');
+                if (Math.random() > 0.7) {
+                    connection.classList.add('strong');
+                }
+            }
+            
+            container.appendChild(connection);
+        }
+
+        function updateNeuralStats() {
+            // Simulate neural network forward pass with current process data
+            neuralNetwork.activations.input = [
+                (processData.reactorTemp - 50) / 50,        // Normalized temperature
+                (processData.reactorPressure - 3) / 5,      // Normalized pressure
+                (processData.mainFlow - 2) / 3              // Normalized flow
+            ];
+            
+            // Forward pass simulation
+            forwardPass();
+            
+            // Update UI stats
+            document.getElementById('active-connections').textContent = `${Math.floor(24 + Math.random() * 6)}/42`;
+            document.getElementById('learning-rate').textContent = neuralNetwork.learningRate.toFixed(6);
+            document.getElementById('error-function').textContent = neuralNetwork.error.toFixed(6);
+            document.getElementById('epoch-count').textContent = neuralNetwork.epochs.toString();
+            document.getElementById('convergence').textContent = neuralNetwork.convergence.toFixed(1) + '%';
+            document.getElementById('prediction-accuracy').textContent = (95 + Math.random() * 4).toFixed(1) + '%';
+            
+            // Update neuron visual states based on activations
+            updateNeuronVisuals();
+        }
+
+        function forwardPass() {
+            // Hidden Layer 1
+            for (let i = 0; i < 6; i++) {
+                neuralNetwork.activations.hidden1[i] = 0;
+                for (let j = 0; j < 3; j++) {
+                    neuralNetwork.activations.hidden1[i] += 
+                        neuralNetwork.activations.input[j] * neuralNetwork.weights.input_hidden1[j][i];
+                }
+                neuralNetwork.activations.hidden1[i] = sigmoid(neuralNetwork.activations.hidden1[i]);
+            }
+            
+            // Hidden Layer 2
+            for (let i = 0; i < 4; i++) {
+                neuralNetwork.activations.hidden2[i] = 0;
+                for (let j = 0; j < 6; j++) {
+                    neuralNetwork.activations.hidden2[i] += 
+                        neuralNetwork.activations.hidden1[j] * neuralNetwork.weights.hidden1_hidden2[j][i];
+                }
+                neuralNetwork.activations.hidden2[i] = sigmoid(neuralNetwork.activations.hidden2[i]);
+            }
+            
+            // Output Layer
+            for (let i = 0; i < 3; i++) {
+                neuralNetwork.activations.output[i] = 0;
+                for (let j = 0; j < 4; j++) {
+                    neuralNetwork.activations.output[i] += 
+                        neuralNetwork.activations.hidden2[j] * neuralNetwork.weights.hidden2_output[j][i];
+                }
+                neuralNetwork.activations.output[i] = sigmoid(neuralNetwork.activations.output[i]);
+            }
+            
+            // Map outputs to PID parameters
+            const outputs = neuralNetwork.activations.output;
+            aiController.kp = 0.5 + outputs[0] * 2.5;    // 0.5 to 3.0
+            aiController.ki = 0.05 + outputs[1] * 0.45;  // 0.05 to 0.5
+            aiController.kd = 0.1 + outputs[2] * 0.9;    // 0.1 to 1.0
+        }
+
+        function sigmoid(x) {
+            return 1 / (1 + Math.exp(-x));
+        }
+
+        function updateNeuronVisuals() {
+            // Update input neurons
+            const tempNeuron = document.querySelector('[data-neuron="temp"]');
+            const pressureNeuron = document.querySelector('[data-neuron="pressure"]');
+            const flowNeuron = document.querySelector('[data-neuron="flow"]');
+            
+            if (tempNeuron) updateNeuronState(tempNeuron, neuralNetwork.activations.input[0]);
+            if (pressureNeuron) updateNeuronState(pressureNeuron, neuralNetwork.activations.input[1]);
+            if (flowNeuron) updateNeuronState(flowNeuron, neuralNetwork.activations.input[2]);
+            
+            // Update hidden layer 1
+            for (let i = 0; i < 6; i++) {
+                const neuron = document.querySelector(`[data-neuron="h1_${i+1}"]`);
+                if (neuron) updateNeuronState(neuron, neuralNetwork.activations.hidden1[i]);
+            }
+            
+            // Update hidden layer 2
+            for (let i = 0; i < 4; i++) {
+                const neuron = document.querySelector(`[data-neuron="h2_${i+1}"]`);
+                if (neuron) updateNeuronState(neuron, neuralNetwork.activations.hidden2[i]);
+            }
+            
+            // Update output neurons
+            const kpNeuron = document.querySelector('[data-neuron="kp_out"]');
+            const kiNeuron = document.querySelector('[data-neuron="ki_out"]');
+            const kdNeuron = document.querySelector('[data-neuron="kd_out"]');
+            
+            if (kpNeuron) updateNeuronState(kpNeuron, neuralNetwork.activations.output[0]);
+            if (kiNeuron) updateNeuronState(kiNeuron, neuralNetwork.activations.output[1]);
+            if (kdNeuron) updateNeuronState(kdNeuron, neuralNetwork.activations.output[2]);
+        }
+
+        function updateNeuronState(neuron, activation) {
+            neuron.classList.remove('active', 'inactive');
+            
+            if (activation > 0.7) {
+                neuron.classList.add('active');
+                neuron.title = neuron.title.split(' - ')[0] + ` - Aktiváció: ${activation.toFixed(3)}`;
+            } else if (activation < 0.3) {
+                neuron.classList.add('inactive');
+                neuron.title = neuron.title.split(' - ')[0] + ` - Aktiváció: ${activation.toFixed(3)}`;
+            } else {
+                neuron.title = neuron.title.split(' - ')[0] + ` - Aktiváció: ${activation.toFixed(3)}`;
+            }
+        }
+
+        function simulateTraining() {
+            // Simulate training epoch
+            neuralNetwork.epochs += Math.floor(10 + Math.random() * 20);
+            neuralNetwork.error = Math.max(0.0001, neuralNetwork.error * (0.98 + Math.random() * 0.03));
+            neuralNetwork.convergence = Math.min(99.9, neuralNetwork.convergence + Math.random() * 0.5);
+            
+            // Slightly adjust weights
+            adjustWeights();
+            updateWeightDisplay();
+            updateNeuralStats();
+            
+            // Visual feedback
+            const neurons = document.querySelectorAll('.neural-neuron');
+            neurons.forEach(neuron => {
+                neuron.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    neuron.style.transform = 'scale(1)';
+                }, 300);
+            });
+            
+            addNeuralLog(`[NEURAL-TRAIN] Epoch ${neuralNetwork.epochs}, Hiba: ${neuralNetwork.error.toFixed(6)}`, '#ffff00');
+            addAlarm('info', `Neurális háló tanítás: Epoch ${neuralNetwork.epochs}`, getCurrentTime());
+        }
+
+        function adjustWeights() {
+            // Small random adjustments to simulate learning
+            for (let i = 0; i < neuralNetwork.weights.input_hidden1.length; i++) {
+                for (let j = 0; j < neuralNetwork.weights.input_hidden1[i].length; j++) {
+                    neuralNetwork.weights.input_hidden1[i][j] += (Math.random() - 0.5) * 0.01;
+                }
+            }
+        }
+
+        function resetNeuralNetwork() {
+            neuralNetwork.epochs = 0;
+            neuralNetwork.error = 0.1;
+            neuralNetwork.convergence = 50.0;
+            
+            initializeNeuralNetwork();
+            addNeuralLog('[NEURAL-RESET] Neurális háló újraindítva', '#ff8800');
+            addAlarm('info', 'Neurális háló reset befejezve', getCurrentTime());
+        }
+
+        function exportNeuralData() {
+            const neuralData = {
+                architecture: "3-6-4-3",
+                weights: neuralNetwork.weights,
+                activations: neuralNetwork.activations,
+                stats: {
+                    epochs: neuralNetwork.epochs,
+                    error: neuralNetwork.error,
+                    convergence: neuralNetwork.convergence,
+                    learningRate: neuralNetwork.learningRate
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            const jsonData = JSON.stringify(neuralData, null, 2);
+            
+            try {
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `neural_network_${Date.now()}.json`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                addNeuralLog('[NEURAL-EXPORT] Neurális háló adatok exportálva', '#00ff00');
+                addAlarm('info', 'Neurális háló adatok sikeresen exportálva', getCurrentTime());
+            } catch (error) {
+                addNeuralLog(`[NEURAL-EXPORT] Export hiba: ${error.message}`, '#ff0000');
+            }
+        }
+
+        let neuralAnimationInterval = null;
+
+        function startNeuralAnimation() {
+            if (neuralAnimationInterval) clearInterval(neuralAnimationInterval);
+            
+            neuralAnimationInterval = setInterval(() => {
+                updateNeuralStats();
+                
+                // Animate connections randomly
+                const connections = document.querySelectorAll('.neural-connection');
+                connections.forEach(conn => {
+                    if (Math.random() > 0.8) {
+                        conn.classList.toggle('active');
+                    }
+                    if (Math.random() > 0.9) {
+                        conn.classList.toggle('strong');
+                    }
+                });
+            }, 1000);
+        }
+
+        function stopNeuralAnimation() {
+            if (neuralAnimationInterval) {
+                clearInterval(neuralAnimationInterval);
+                neuralAnimationInterval = null;
+            }
+        }
 
         // Main Functions
         function openPIDModal() {
@@ -1493,34 +1999,12 @@
             if (tempError) tempError.textContent = aiController.tempError.toFixed(2) + '°C';
             if (tempIntegral) tempIntegral.textContent = aiController.tempIntegral.toFixed(2);
             if (tempDerivative) tempDerivative.textContent = (aiController.tempError - aiController.tempErrorPrev).toFixed(3);
-            
-            // Update pressure control status
-            const pressureError = document.getElementById('modal-pressure-error');
-            const pressureIntegral = document.getElementById('modal-pressure-integral');
-            const pressureDerivative = document.getElementById('modal-pressure-derivative');
-            
-            if (pressureError) pressureError.textContent = aiController.pressureError.toFixed(2) + ' bar';
-            if (pressureIntegral) pressureIntegral.textContent = aiController.pressureIntegral.toFixed(2);
-            if (pressureDerivative) pressureDerivative.textContent = (aiController.pressureError - aiController.pressureErrorPrev).toFixed(3);
-            
-            // Update flow control status
-            const flowError = document.getElementById('modal-flow-error');
-            const flowIntegral = document.getElementById('modal-flow-integral');
-            const flowDerivative = document.getElementById('modal-flow-derivative');
-            
-            if (flowError) flowError.textContent = aiController.flowError.toFixed(2) + ' L/min';
-            if (flowIntegral) flowIntegral.textContent = aiController.flowIntegral.toFixed(2);
-            if (flowDerivative) flowDerivative.textContent = (aiController.flowError - aiController.flowErrorPrev).toFixed(3);
         }
 
         function goToControlView() {
-            // Close modal first
             closePIDModal();
-            
-            // Switch to control view
             switchView('control');
             
-            // Expand the setpoints section if collapsed
             const setpointsContent = document.getElementById('setpoints-content');
             const setpointsIcon = document.getElementById('setpoints-icon');
             
@@ -1529,7 +2013,6 @@
                 if (setpointsIcon) setpointsIcon.classList.add('expanded');
             }
             
-            // Highlight the setpoints section briefly
             setTimeout(() => {
                 const setpointsSection = document.querySelector('[onclick="toggleCollapse(\'setpoints\')"]');
                 if (setpointsSection) {
@@ -1569,11 +2052,9 @@
         function switchView(view) {
             currentView = view;
             
-            // Update active button
             const buttons = document.querySelectorAll('.toolbar-button');
             buttons.forEach(btn => btn.classList.remove('active'));
             
-            // Find and activate the correct button
             const viewTexts = {
                 'overview': 'Áttekintés',
                 'trends': 'Trendek',
@@ -1587,7 +2068,6 @@
                 }
             });
             
-            // Reset panels to default state
             const sidebar = document.querySelector('.sidebar');
             const processOverview = document.querySelector('.process-overview');
             const rightPanel = document.querySelector('.right-panel');
@@ -1606,13 +2086,10 @@
                 trendsPanel.style.height = '60%';
             }
             
-            // Scroll to and highlight relevant sections
             switch(view) {
                 case 'overview':
-                    // Scroll to top and show process overview
                     if (processOverview) {
                         processOverview.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        // Brief highlight
                         processOverview.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.6)';
                         setTimeout(() => processOverview.style.boxShadow = '', 2000);
                     }
@@ -1620,12 +2097,10 @@
                     break;
                     
                 case 'trends':
-                    // Scroll to trends panel and expand it
                     if (trendsPanel) {
                         alarmsPanel.style.display = 'none';
                         trendsPanel.style.height = '100%';
                         
-                        // Expand trends panel if collapsed
                         const trendsContent = document.getElementById('trends-panel-content');
                         const trendsIcon = document.getElementById('trends-panel-icon');
                         if (trendsContent && trendsContent.classList.contains('collapsed')) {
@@ -1633,10 +2108,7 @@
                             if (trendsIcon) trendsIcon.classList.add('expanded');
                         }
                         
-                        // Scroll to trends panel
                         trendsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Highlight trends panel
                         trendsPanel.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
                         setTimeout(() => trendsPanel.style.boxShadow = '', 2000);
                     }
@@ -1644,12 +2116,10 @@
                     break;
                     
                 case 'alarms':
-                    // Scroll to alarms panel and expand it
                     if (alarmsPanel) {
                         trendsPanel.style.display = 'none';
                         alarmsPanel.style.height = '100%';
                         
-                        // Expand alarms panel if collapsed
                         const alarmsContent = document.getElementById('alarms-panel-content');
                         const alarmsIcon = document.getElementById('alarms-panel-icon');
                         if (alarmsContent && alarmsContent.classList.contains('collapsed')) {
@@ -1657,10 +2127,7 @@
                             if (alarmsIcon) alarmsIcon.classList.add('expanded');
                         }
                         
-                        // Scroll to alarms panel
                         alarmsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Highlight alarms panel
                         alarmsPanel.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.6)';
                         setTimeout(() => alarmsPanel.style.boxShadow = '', 2000);
                     }
@@ -1668,11 +2135,9 @@
                     break;
                     
                 case 'control':
-                    // Scroll to sidebar and expand control sections
                     if (sidebar) {
                         sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         
-                        // Expand setpoints and AI control sections
                         const setpointsContent = document.getElementById('setpoints-content');
                         const setpointsIcon = document.getElementById('setpoints-icon');
                         const aiControlContent = document.getElementById('ai-control-content');
@@ -1688,7 +2153,6 @@
                             if (aiControlIcon) aiControlIcon.classList.add('expanded');
                         }
                         
-                        // Highlight setpoints section after a brief delay
                         setTimeout(() => {
                             const setpointsHeader = document.querySelector('[onclick="toggleCollapse(\'setpoints\')"]');
                             if (setpointsHeader) {
@@ -1712,7 +2176,6 @@
                 addNeuralLog('[MAINTENANCE] Karbantartási mód AKTÍV', '#ff8800');
                 addAlarm('warning', 'Karbantartási mód aktiválva', getCurrentTime());
                 
-                // Update button appearance
                 const maintenanceBtn = document.querySelector('[onclick="toggleMaintenance()"]');
                 if (maintenanceBtn) {
                     maintenanceBtn.textContent = '🔧 Karbantartás (AKTÍV)';
@@ -1723,7 +2186,6 @@
                 addNeuralLog('[MAINTENANCE] Karbantartási mód INAKTÍV', '#00ffff');
                 addAlarm('info', 'Karbantartási mód kikapcsolva', getCurrentTime());
                 
-                // Reset button appearance
                 const maintenanceBtn = document.querySelector('[onclick="toggleMaintenance()"]');
                 if (maintenanceBtn) {
                     maintenanceBtn.textContent = '🔧 Karbantartás';
@@ -1734,7 +2196,6 @@
         }
 
         function exportReport() {
-            console.log('exportReport function called');
             addNeuralLog('[EXPORT] Jelentés generálás indítva...', '#ffff00');
             
             const reportContent = `SCADA/DCS SYSTEM REPORT
@@ -1754,38 +2215,29 @@ AI-PID CONTROLLER:
 - Ki: ${aiController.ki.toFixed(4)}
 - Kd: ${aiController.kd.toFixed(3)}
 
+NEURAL NETWORK:
+- Architecture: 3-6-4-3
+- Epochs: ${neuralNetwork.epochs}
+- Error: ${neuralNetwork.error.toFixed(6)}
+- Convergence: ${neuralNetwork.convergence.toFixed(1)}%
+- Learning Rate: ${neuralNetwork.learningRate}
+
 SYSTEM STATUS:
 - Active Alarms: ${alarmCount}
 - Maintenance Mode: ${maintenanceMode ? 'ACTIVE' : 'INACTIVE'}
 - Current View: ${currentView}
 - Operator: Admin
-- Report ID: RPT-${Date.now()}
-
-DETAILED SENSOR READINGS:
-- TI-101: ${processData.reactorTemp.toFixed(2)}°C
-- TI-102: ${processData.hxOutletTemp.toFixed(2)}°C
-- TI-103: ${processData.tankTemp.toFixed(2)}°C
-- PI-201: ${processData.reactorPressure.toFixed(2)} bar
-- PI-202: ${processData.linePressure.toFixed(2)} bar
-- FI-301: ${processData.mainFlow.toFixed(2)} L/min
-- FI-302: ${processData.bypassFlow.toFixed(2)} L/min`;
+- Report ID: RPT-${Date.now()}`;
             
-            console.log('Report content generated, length:', reportContent.length);
-            
-            // Egyszerű módszer: azonnal megjelenítjük modal-ban
             showReportModal(reportContent);
         }
 
         function showReportModal(reportContent) {
-            console.log('showReportModal called');
-            
-            // Remove any existing report modal
             const existingModal = document.getElementById('report-modal');
             if (existingModal) {
                 existingModal.remove();
             }
             
-            // Create modal for report display
             const modal = document.createElement('div');
             modal.id = 'report-modal';
             modal.style.cssText = `
@@ -1818,7 +2270,6 @@ DETAILED SENSOR READINGS:
             modal.appendChild(content);
             document.body.appendChild(modal);
             
-            // Event listeners
             document.getElementById('close-report').onclick = function() {
                 modal.remove();
                 addNeuralLog('[EXPORT] Jelentés ablak bezárva', '#00ffff');
@@ -1857,7 +2308,6 @@ DETAILED SENSOR READINGS:
                 }
             };
             
-            // Close on background click
             modal.onclick = function(e) {
                 if (e.target === modal) {
                     modal.remove();
@@ -1877,7 +2327,6 @@ DETAILED SENSOR READINGS:
             
             addNeuralLog('[ALARM] Riasztások nyugtázva', '#00ffff');
             
-            // Update alarm indicator
             const alarmIndicator = document.getElementById('alarm-status');
             if (alarmIndicator) {
                 alarmIndicator.className = 'alarm-indicator';
@@ -1919,17 +2368,14 @@ DETAILED SENSOR READINGS:
         }
 
         function tunePID() {
-            // Simulate auto-tuning with slight variations
             aiController.kp += (Math.random() - 0.5) * 0.1;
             aiController.ki += (Math.random() - 0.5) * 0.02;
             aiController.kd += (Math.random() - 0.5) * 0.05;
             
-            // Keep values within reasonable bounds
             aiController.kp = Math.max(0.5, Math.min(3.0, aiController.kp));
             aiController.ki = Math.max(0.05, Math.min(0.5, aiController.ki));
             aiController.kd = Math.max(0.1, Math.min(1.0, aiController.kd));
             
-            // Update performance
             aiController.performance = Math.min(0.99, aiController.performance + (Math.random() * 0.02));
             
             updatePIDDisplay();
@@ -1938,7 +2384,6 @@ DETAILED SENSOR READINGS:
         }
 
         function updatePIDDisplay() {
-            // Update PID parameter display
             const kpElement = document.getElementById('pid-kp');
             const kiElement = document.getElementById('pid-ki');
             const kdElement = document.getElementById('pid-kd');
@@ -1957,7 +2402,6 @@ DETAILED SENSOR READINGS:
             aiController.kd = 0.25;
             aiController.performance = 0.95;
             
-            // Reset PID state variables
             aiController.tempError = 0;
             aiController.tempErrorPrev = 0;
             aiController.tempIntegral = 0;
@@ -2009,14 +2453,11 @@ DETAILED SENSOR READINGS:
                     break;
             }
             
-            // Validation and status update
             updateSetpointStatus(type, newValue);
             
-            // Log the change
             addNeuralLog(`[SETPOINT] ${tag}: ${oldValue}${unit} → ${newValue}${unit}`, '#00ffff');
             addAlarm('info', `Setpoint módosítva: ${tag} = ${newValue}${unit}`, getCurrentTime());
             
-            // Reset integral terms when setpoint changes to avoid windup
             if (type === 'temp') {
                 aiController.tempIntegral = 0;
                 addNeuralLog('[PID-TEMP] Integrál tag resetelve setpoint változás miatt', '#ffff00');
@@ -2028,7 +2469,6 @@ DETAILED SENSOR READINGS:
                 addNeuralLog('[PID-FLOW] Integrál tag resetelve setpoint változás miatt', '#ffff00');
             }
             
-            // Visual feedback
             const input = document.getElementById(`${type}-setpoint`);
             if (input) {
                 input.style.borderColor = 'var(--success-green)';
@@ -2044,7 +2484,6 @@ DETAILED SENSOR READINGS:
             const input = document.getElementById(`${type}-setpoint`);
             const value = parseFloat(input.value);
             
-            // Real-time validation without applying
             updateSetpointStatus(type, value, true);
         }
 
@@ -2129,22 +2568,18 @@ DETAILED SENSOR READINGS:
                     break;
             }
             
-            // Update input fields
             document.getElementById('temp-setpoint').value = tempSP;
             document.getElementById('pressure-setpoint').value = pressureSP;
             document.getElementById('flow-setpoint').value = flowSP;
             
-            // Apply the setpoints
             processData.tempSetpoint = tempSP;
             processData.pressureSetpoint = pressureSP;
             processData.flowSetpoint = flowSP;
             
-            // Update status for all
             updateSetpointStatus('temp', tempSP);
             updateSetpointStatus('pressure', pressureSP);
             updateSetpointStatus('flow', flowSP);
             
-            // Visual feedback for all inputs
             ['temp', 'pressure', 'flow'].forEach(type => {
                 const input = document.getElementById(`${type}-setpoint`);
                 if (input) {
@@ -2162,29 +2597,13 @@ DETAILED SENSOR READINGS:
             addAlarm('info', `Gyors beállítás alkalmazva: ${mode.toUpperCase()}`, getCurrentTime());
         }
 
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContainer = document.querySelector('.main-container');
-            
-            if (sidebar.style.display === 'none') {
-                sidebar.style.display = 'block';
-                mainContainer.style.gridTemplateColumns = '300px 1fr 350px';
-                addNeuralLog('[UI] Kontroll panel megjelenítve', '#00ffff');
-            } else {
-                sidebar.style.display = 'none';
-                mainContainer.style.gridTemplateColumns = '1fr 350px';
-                addNeuralLog('[UI] Kontroll panel elrejtve', '#00ffff');
-            }
-        }
-
         function updateTrendTimespan() {
             const select = document.getElementById('trend-timespan');
             if (select) {
                 const minutes = select.value;
                 addNeuralLog(`[TREND] Időtartam beállítva: ${minutes} perc`, '#00ffff');
                 
-                // Calculate how many data points that represents
-                const totalPoints = (minutes * 60) / 5; // 5 sec intervals
+                const totalPoints = (minutes * 60) / 5;
                 addNeuralLog(`[TREND] Elméleti adatpontok: ${totalPoints} (jelenleg csak 20 pont tárolva)`, '#ffff00');
             }
         }
@@ -2252,7 +2671,6 @@ Senzor állapot: OK`);
                 log.appendChild(div);
                 log.scrollTop = log.scrollHeight;
                 
-                // Keep only last 10 entries
                 while (log.children.length > 10) {
                     log.removeChild(log.firstChild);
                 }
@@ -2271,7 +2689,6 @@ Senzor állapot: OK`);
                 
                 alarmsList.insertBefore(alarmEntry, alarmsList.firstChild);
                 
-                // Limit alarm list size
                 while (alarmsList.children.length > 20) {
                     alarmsList.removeChild(alarmsList.lastChild);
                 }
@@ -2314,16 +2731,10 @@ Senzor állapot: OK`);
         }
 
         function updateProcessData() {
-            // PID Control for Temperature
             pidControlTemperature();
-            
-            // PID Control for Pressure  
             pidControlPressure();
-            
-            // PID Control for Flow
             pidControlFlow();
             
-            // Add some process noise
             processData.reactorTemp += (Math.random() - 0.5) * 0.1;
             processData.hxOutletTemp = processData.reactorTemp - 20 + (Math.random() - 0.5) * 2;
             processData.tankTemp = processData.hxOutletTemp - 5 + (Math.random() - 0.5) * 1;
@@ -2332,7 +2743,6 @@ Senzor állapot: OK`);
             processData.mainFlow += (Math.random() - 0.5) * 0.05;
             processData.bypassFlow = processData.mainFlow * 0.6 + (Math.random() - 0.5) * 0.1;
             
-            // Update displays
             document.getElementById('tag-ti101').textContent = processData.reactorTemp.toFixed(1) + '°C';
             document.getElementById('tag-ti102').textContent = processData.hxOutletTemp.toFixed(1) + '°C';
             document.getElementById('tag-ti103').textContent = processData.tankTemp.toFixed(1) + '°C';
@@ -2346,125 +2756,96 @@ Senzor állapot: OK`);
             document.getElementById('pv-flow1').textContent = processData.mainFlow.toFixed(1) + ' L/min';
             document.getElementById('pv-pressure1').textContent = processData.reactorPressure.toFixed(1) + ' bar';
             
-            // Check alarm conditions
             checkAlarms();
         }
 
         function pidControlTemperature() {
-            // Calculate error
             aiController.tempError = processData.tempSetpoint - processData.reactorTemp;
             
-            // Proportional term
             const P = aiController.kp * aiController.tempError;
             
-            // Integral term (with windup protection)
             aiController.tempIntegral += aiController.tempError;
             if (aiController.tempIntegral > 100) aiController.tempIntegral = 100;
             if (aiController.tempIntegral < -100) aiController.tempIntegral = -100;
             const I = aiController.ki * aiController.tempIntegral;
             
-            // Derivative term
             const D = aiController.kd * (aiController.tempError - aiController.tempErrorPrev);
             
-            // PID output
             const output = P + I + D;
             
-            // Apply control action to reactor temperature
-            const controlAction = output * 0.1; // Scale factor
+            const controlAction = output * 0.1;
             processData.reactorTemp += controlAction;
             
-            // Update for next iteration
             aiController.tempErrorPrev = aiController.tempError;
             
-            // Log significant control actions
             if (Math.abs(controlAction) > 0.5) {
                 addNeuralLog(`[PID-TEMP] Szabályozás: ${controlAction.toFixed(2)}°C, Hiba: ${aiController.tempError.toFixed(1)}°C`, '#00ffff');
             }
         }
 
         function pidControlPressure() {
-            // Calculate error
             aiController.pressureError = processData.pressureSetpoint - processData.reactorPressure;
             
-            // Proportional term
-            const P = aiController.kp * 0.8 * aiController.pressureError; // Different gain for pressure
+            const P = aiController.kp * 0.8 * aiController.pressureError;
             
-            // Integral term
             aiController.pressureIntegral += aiController.pressureError;
             if (aiController.pressureIntegral > 50) aiController.pressureIntegral = 50;
             if (aiController.pressureIntegral < -50) aiController.pressureIntegral = -50;
             const I = aiController.ki * 0.5 * aiController.pressureIntegral;
             
-            // Derivative term
             const D = aiController.kd * 0.3 * (aiController.pressureError - aiController.pressureErrorPrev);
             
-            // PID output
             const output = P + I + D;
             
-            // Apply control action
             const controlAction = output * 0.05;
             processData.reactorPressure += controlAction;
             
-            // Update for next iteration
             aiController.pressureErrorPrev = aiController.pressureError;
             
-            // Log significant control actions
             if (Math.abs(controlAction) > 0.2) {
                 addNeuralLog(`[PID-PRESS] Szabályozás: ${controlAction.toFixed(2)} bar, Hiba: ${aiController.pressureError.toFixed(1)} bar`, '#00ffff');
             }
         }
 
         function pidControlFlow() {
-            // Calculate error
             aiController.flowError = processData.flowSetpoint - processData.mainFlow;
             
-            // Proportional term
             const P = aiController.kp * 0.6 * aiController.flowError;
             
-            // Integral term
             aiController.flowIntegral += aiController.flowError;
             if (aiController.flowIntegral > 30) aiController.flowIntegral = 30;
             if (aiController.flowIntegral < -30) aiController.flowIntegral = -30;
             const I = aiController.ki * 0.3 * aiController.flowIntegral;
             
-            // Derivative term
             const D = aiController.kd * 0.4 * (aiController.flowError - aiController.flowErrorPrev);
             
-            // PID output
             const output = P + I + D;
             
-            // Apply control action
             const controlAction = output * 0.08;
             processData.mainFlow += controlAction;
             
-            // Update for next iteration
             aiController.flowErrorPrev = aiController.flowError;
             
-            // Log significant control actions
             if (Math.abs(controlAction) > 0.1) {
                 addNeuralLog(`[PID-FLOW] Szabályozás: ${controlAction.toFixed(2)} L/min, Hiba: ${aiController.flowError.toFixed(1)} L/min`, '#00ffff');
             }
         }
 
         function checkAlarms() {
-            // Temperature high alarm
             if (processData.reactorTemp > 70) {
                 addAlarm('critical', `Magas hőmérséklet riasztás - TI-101: ${processData.reactorTemp.toFixed(1)}°C`, getCurrentTime());
             }
             
-            // Pressure high alarm
             if (processData.reactorPressure > 8) {
                 addAlarm('critical', `Magas nyomás riasztás - PI-201: ${processData.reactorPressure.toFixed(1)} bar`, getCurrentTime());
             }
             
-            // Low flow alarm
             if (processData.mainFlow < 2) {
                 addAlarm('warning', `Alacsony áramlás - FI-301: ${processData.mainFlow.toFixed(1)} L/min`, getCurrentTime());
             }
         }
 
         function initializeCharts() {
-            // Initialize temperature trend chart
             const tempCtx = document.getElementById('temp-trend');
             if (tempCtx) {
                 tempTrendChart = new Chart(tempCtx.getContext('2d'), {
@@ -2520,7 +2901,6 @@ Senzor állapot: OK`);
                 });
             }
 
-            // Initialize pressure trend chart
             const pressureCtx = document.getElementById('pressure-trend');
             if (pressureCtx) {
                 pressureTrendChart = new Chart(pressureCtx.getContext('2d'), {
@@ -2576,7 +2956,6 @@ Senzor állapot: OK`);
                 });
             }
 
-            // Initialize PID trend chart
             const pidCtx = document.getElementById('pid-trend');
             if (pidCtx) {
                 pidTrendChart = new Chart(pidCtx.getContext('2d'), {
@@ -2719,7 +3098,7 @@ Senzor állapot: OK`);
             if (pidTrendChart) {
                 pidTrendChart.data.labels.push(timeLabel);
                 pidTrendChart.data.datasets[0].data.push(aiController.kp);
-                pidTrendChart.data.datasets[1].data.push(aiController.ki * 10); // Scale Ki for visibility
+                pidTrendChart.data.datasets[1].data.push(aiController.ki * 10);
                 pidTrendChart.data.datasets[2].data.push(aiController.kd);
                 pidTrendChart.data.datasets[3].data.push(aiController.performance * 100);
                 
@@ -2755,40 +3134,40 @@ Senzor állapot: OK`);
                         event.preventDefault();
                         toggleAILearning();
                         break;
+                    case 'n':
+                        event.preventDefault();
+                        openNeuralModal();
+                        break;
                 }
             }
         });
 
         // Initialize system when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize system components
             updateSystemTime();
             setInterval(updateSystemTime, 1000);
             
             initializeCharts();
+            initializeNeuralNetwork();
             
-            // Start data simulation
-            setInterval(updateProcessData, 2000);  // Process data: 2 másodpercenként
-            setInterval(updateCharts, 5000);       // Chart update: 5 másodpercenként
+            setInterval(updateProcessData, 2000);
+            setInterval(updateCharts, 5000);
             
-            // AI iteration counter with PID parameter evolution
             setInterval(() => {
                 if (aiLearningActive) {
                     aiController.iterations++;
+                    neuralNetwork.epochs++;
                     
-                    // Simulate slight PID parameter adjustments during learning
+                    if (aiController.iterations % 10 === 0) {
+                        updateNeuralStats();
+                    }
+                    
                     if (aiController.iterations % 100 === 0) {
-                        aiController.kp += (Math.random() - 0.5) * 0.05;
-                        aiController.ki += (Math.random() - 0.5) * 0.01;
-                        aiController.kd += (Math.random() - 0.5) * 0.02;
+                        forwardPass();
                         
-                        // Keep within bounds
-                        aiController.kp = Math.max(0.5, Math.min(3.0, aiController.kp));
-                        aiController.ki = Math.max(0.05, Math.min(0.5, aiController.ki));
-                        aiController.kd = Math.max(0.1, Math.min(1.0, aiController.kd));
-                        
-                        // Gradually improve performance
                         aiController.performance = Math.min(0.99, aiController.performance + 0.001);
+                        neuralNetwork.error = Math.max(0.0001, neuralNetwork.error * 0.999);
+                        neuralNetwork.convergence = Math.min(99.9, neuralNetwork.convergence + 0.01);
                     }
                     
                     if (aiController.iterations % 50 === 0) {
@@ -2796,27 +3175,33 @@ Senzor állapot: OK`);
                     }
                 }
                 
-                // Update PID display every second
                 updatePIDDisplay();
                 
-                // Update PID modal if open
-                const modal = document.getElementById('pid-modal-overlay');
-                if (modal && modal.classList.contains('show')) {
+                const pidModal = document.getElementById('pid-modal-overlay');
+                if (pidModal && pidModal.classList.contains('show')) {
                     updatePIDModal();
+                }
+                
+                const neuralModal = document.getElementById('neural-modal-overlay');
+                if (neuralModal && neuralModal.classList.contains('show')) {
+                    updateNeuralStats();
                 }
             }, 1000);
             
-            // Initial setup
             setTimeout(() => {
                 updatePIDDisplay();
             }, 100);
             
-            // Initial logs
             addNeuralLog('[SYSTEM] SCADA/DCS rendszer inicializálva', '#00ff00');
             addNeuralLog('[AI-PID] Neurális háló aktív', '#ffff00');
-            addNeuralLog('[INFO] Billentyűkombinációk: Ctrl+A, Ctrl+M, Ctrl+R, Ctrl+L', '#00ffff');
+            addNeuralLog('[NEURAL] 3-6-4-3 architektúra betöltve', '#00ffff');
+            addNeuralLog('[INFO] Billentyűkombinációk: Ctrl+A, Ctrl+M, Ctrl+R, Ctrl+L, Ctrl+N', '#00ffff');
             addNeuralLog('[INFO] Kattints a címsorokra a panelek összecsukásához/kibontásához', '#00ffff');
         });
     </script>
 </body>
-</html>
+</html> class="alarm-time">12:34</span>
+                            <span class="alarm-message">SCADA/DCS rendszer elindítva</span>
+                        </div>
+                        <div class="alarm-entry info">
+                            <span
